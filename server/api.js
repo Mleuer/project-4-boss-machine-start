@@ -11,6 +11,43 @@ const {
     deleteAllFromDatabase,
 } = require('./db.js');
 const minionType = 'minions';
+const ideaType = 'ideas';
+
+function getObjectFromDatabaseWithID(req, res, objectID, objectType) {
+    const object = getFromDatabaseById(objectType, objectID);
+    if (object) {
+        res.send(object)
+    } else {
+        res.status(404).send();
+    }
+}
+
+function updateObjectInDatabaseWithID(req, res, objectType) {
+    const object = req.body;
+    const objectUpdatedInDatabase = updateInstanceInDatabase(objectType, object);
+    if (objectUpdatedInDatabase) {
+        res.send(objectUpdatedInDatabase);
+    } else {
+        res.status(404).send();
+    }
+}
+
+function addObjectToDatabase(req, res, objectType) {
+    const object = req.body;
+    const objectAddedToDatabase = addToDatabase(objectType, object);
+    if (objectAddedToDatabase) {
+        res.status(201).send(objectAddedToDatabase);
+    }
+}
+
+function deleteObjectFromDatabaseWithID(req, res, objectID, objectType) {
+    const successfullyDeletedObject = deleteFromDatabasebyId(objectType, objectID);
+    if (!successfullyDeletedObject) {
+        res.status(404).send();
+    } else {
+        res.status(204).send();
+    }
+}
 
 apiRouter.get('/minions', (req, res, next) => {
     res.send(getAllFromDatabase(minionType));
@@ -18,41 +55,39 @@ apiRouter.get('/minions', (req, res, next) => {
 });
 
 apiRouter.get('/minions/:minionId', (req, res, next) => {
-    const minionID = req.params.minionId;
-    const minion = getFromDatabaseById(minionType, minionID);
-    if (minion) {
-        res.send(minion)
-    }else {
-        res.status(404).send();
-    }
+    getObjectFromDatabaseWithID(req, res, req.params.minionId, minionType);
 });
 
 apiRouter.put('/minions/:minionId', (req, res, next) => {
-    const updatedMinion = req.body;
-    const minionUpdatedInDatabase = updateInstanceInDatabase(minionType, updatedMinion);
-    if (minionUpdatedInDatabase) {
-        res.send(minionUpdatedInDatabase);
-    }else {
-        res.status(404).send();
-    }
-
+    updateObjectInDatabaseWithID(req, res, minionType);
 });
 
 apiRouter.post('/minions', (req, res, next) => {
-    const newMinion = req.body;
-    const minionAddedToDatabase = addToDatabase(minionType, newMinion);
-    if (minionAddedToDatabase) {
-        res.status(201).send(minionAddedToDatabase);
-    }
+    addObjectToDatabase(req, res, minionType);
 });
 
 apiRouter.delete('/minions/:minionId', (req, res, next) => {
-    const minionID = req.params.minionId;
-    const successfullyDeletedMinion = deleteFromDatabasebyId(minionType, minionID);
-    if (!successfullyDeletedMinion) {
-        res.status(404).send();
-    }
+    deleteObjectFromDatabaseWithID(req, res, req.params.minionId, minionType);
 });
 
+apiRouter.get('/ideas', (req, res, next) => {
+    res.send(getAllFromDatabase(ideaType));
+});
+
+apiRouter.get('/ideas/:ideaId', (req, res, next) => {
+    getObjectFromDatabaseWithID(req, res, req.params.ideaId, ideaType);
+});
+
+apiRouter.put('/ideas/:ideaId', (req, res, next) => {
+    updateObjectInDatabaseWithID(req, res, ideaType);
+});
+
+apiRouter.post('/ideas', (req, res, next) => {
+    addObjectToDatabase(req, res, ideaType);
+});
+
+apiRouter.delete('/ideas/:ideaId', (req, res, next) => {
+    deleteObjectFromDatabaseWithID(req, res, req.params.ideaId, ideaType);
+});
 
 module.exports = apiRouter;
