@@ -1,6 +1,6 @@
 const express = require('express');
 const apiRouter = express.Router();
-
+const checkMillionDollarIdea = require('./checkMillionDollarIdea.js');
 const {
     createMeeting,
     getAllFromDatabase,
@@ -10,8 +10,10 @@ const {
     deleteFromDatabasebyId,
     deleteAllFromDatabase,
 } = require('./db.js');
+
 const minionType = 'minions';
 const ideaType = 'ideas';
+const meetingType = 'meetings';
 
 function getObjectFromDatabaseWithID(req, res, objectID, objectType) {
     const object = getFromDatabaseById(objectType, objectID);
@@ -51,7 +53,6 @@ function deleteObjectFromDatabaseWithID(req, res, objectID, objectType) {
 
 apiRouter.get('/minions', (req, res, next) => {
     res.send(getAllFromDatabase(minionType));
-    next();
 });
 
 apiRouter.get('/minions/:minionId', (req, res, next) => {
@@ -88,6 +89,28 @@ apiRouter.post('/ideas', (req, res, next) => {
 
 apiRouter.delete('/ideas/:ideaId', (req, res, next) => {
     deleteObjectFromDatabaseWithID(req, res, req.params.ideaId, ideaType);
+});
+
+apiRouter.get('/meetings', (req, res, next) => {
+    res.send(getAllFromDatabase(meetingType));
+});
+
+apiRouter.post('/meetings', (req, res, next) => {
+    const meeting = createMeeting();
+    const objectAddedToDatabase = addToDatabase(meetingType, meeting);
+    if (objectAddedToDatabase) {
+        res.status(201).send(objectAddedToDatabase);
+    }
+});
+
+apiRouter.delete('/meetings', (req, res, next) => {
+    const successfullyDeletedMeetings = deleteAllFromDatabase(meetingType);
+
+    if (successfullyDeletedMeetings.length !== 0) {
+        res.status(404).send();
+    } else {
+        res.status(204).send();
+    }
 });
 
 module.exports = apiRouter;
